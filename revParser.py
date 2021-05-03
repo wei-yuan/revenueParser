@@ -20,7 +20,7 @@ class Parser:
         pass
 
     @staticmethod
-    def parse_single_month(year: str, month: str, tick: str, company_type: CompanyType):
+    def parse_single_month_revenue(year: str, month: str, tick: str, company_type: CompanyType):
         '''
         :param year: ROC calendar
         :param month: the month you that you want to query
@@ -42,5 +42,6 @@ class Parser:
         df = pd.concat([df.iloc[:-1, :] for df in df_html[0:] if df.shape[1] == 11])
         # get rid of the header that I don't need
         df = df.droplevel(0, axis=1)
+        select_df = df[df["公司代號"] == tick]
 
-        return df
+        return select_df["當月營收"].item()
