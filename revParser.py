@@ -5,6 +5,7 @@ import pandas_datareader as pdr
 import matplotlib.pyplot as plt
 import seaborn as sns
 from enum import Enum
+from io import StringIO
 
 
 class CompanyType(Enum):
@@ -31,7 +32,15 @@ class Parser:
         # parse information form TWSE
         date = '_'.join([year, month])
         url = 'https://mops.twse.com.tw/nas/t21/' + company_type + '/t21sc03_' + date + '_0.html'
-        df_html = pd.read_html(url)
+        r = requests.get(url=url)
+        # Big-5 or Big5 is a Chinese character encoding method used in Taiwan, Hong Kong, and Macau
+        # for traditional Chinese characters.
+        r.encoding = 'big5'
+        df_html = pd.read_html(StringIO(r.text), encoding='big5')
         # get revenue information from dataframe
+        # 2021/5/3 to extract the data we want, do something brutally here...
+        df = pd.concat([df.iloc[:-1, :] for df in df_html[0:] if df.shape[1] == 11])
+        # get rid of the header that I don't need
+        df = df.droplevel(0, axis=1)
 
-        return df_html
+        return df
